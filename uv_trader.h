@@ -53,87 +53,87 @@ public:
 
 
 
-    virtual void OnFrontDisconnected(int nReason) {};
+    virtual void OnFrontDisconnected(int nReason) ;
 
-    virtual void OnHeartBeatWarning(int nTimeLapse) {};
+    virtual void OnHeartBeatWarning(int nTimeLapse) ;
 
-    virtual void OnPackageStart(int nTopicID, int nSequenceNo) {};
+    virtual void OnPackageStart(int nTopicID, int nSequenceNo) ;
 
-    virtual void OnPackageEnd(int nTopicID, int nSequenceNo) {};
+    virtual void OnPackageEnd(int nTopicID, int nSequenceNo) ;
 
-    virtual void OnRspError(CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {};
+    virtual void OnRspError(CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) ;
 
     virtual void
     OnRspUserLogout(CUstpFtdcRspUserLogoutField *pRspUserLogout, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
-                    bool bIsLast) {};
+                    bool bIsLast) ;
 
     virtual void
     OnRspUserPasswordUpdate(CUstpFtdcUserPasswordUpdateField *pUserPasswordUpdate, CUstpFtdcRspInfoField *pRspInfo,
-                            int nRequestID, bool bIsLast) {};
+                            int nRequestID, bool bIsLast) ;
 
     virtual void
     OnRspOrderAction(CUstpFtdcOrderActionField *pOrderAction, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
-                     bool bIsLast) {};
+                     bool bIsLast) ;
 
-    virtual void OnRtnFlowMessageCancel(CUstpFtdcFlowMessageCancelField *pFlowMessageCancel) {};
+    virtual void OnRtnFlowMessageCancel(CUstpFtdcFlowMessageCancelField *pFlowMessageCancel) ;
 
-    virtual void OnRtnTrade(CUstpFtdcTradeField *pTrade) {};
+    virtual void OnRtnTrade(CUstpFtdcTradeField *pTrade) ;
 
-    virtual void OnRtnOrder(CUstpFtdcOrderField *pOrder) {};
+    virtual void OnRtnOrder(CUstpFtdcOrderField *pOrder) ;
 
-    virtual void OnErrRtnOrderAction(CUstpFtdcOrderActionField *pOrderAction, CUstpFtdcRspInfoField *pRspInfo) {};
+    virtual void OnErrRtnOrderAction(CUstpFtdcOrderActionField *pOrderAction, CUstpFtdcRspInfoField *pRspInfo) ;
 
-    virtual void OnRtnInstrumentStatus(CUstpFtdcInstrumentStatusField *pInstrumentStatus) {};
+    virtual void OnRtnInstrumentStatus(CUstpFtdcInstrumentStatusField *pInstrumentStatus) ;
 
-    virtual void OnRtnInvestorAccountDeposit(CUstpFtdcInvestorAccountDepositResField *pInvestorAccountDepositRes) {};
-
-    virtual void
-    OnRspQryOrder(CUstpFtdcOrderField *pOrder, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {};
+    virtual void OnRtnInvestorAccountDeposit(CUstpFtdcInvestorAccountDepositResField *pInvestorAccountDepositRes) ;
 
     virtual void
-    OnRspQryTrade(CUstpFtdcTradeField *pTrade, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {};
+    OnRspQryOrder(CUstpFtdcOrderField *pOrder, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) ;
+
+    virtual void
+    OnRspQryTrade(CUstpFtdcTradeField *pTrade, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) ;
 
     virtual void OnRspQryUserInvestor(CUstpFtdcRspUserInvestorField *pRspUserInvestor, CUstpFtdcRspInfoField *pRspInfo,
-                                      int nRequestID, bool bIsLast) {};
+                                      int nRequestID, bool bIsLast) ;
 
     virtual void
     OnRspQryTradingCode(CUstpFtdcRspTradingCodeField *pRspTradingCode, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
-                        bool bIsLast) {};
+                        bool bIsLast) ;
 
     virtual void
     OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *pRspInvestorAccount, CUstpFtdcRspInfoField *pRspInfo,
-                            int nRequestID, bool bIsLast) {};
+                            int nRequestID, bool bIsLast) ;
 
     virtual void
     OnRspQryInstrument(CUstpFtdcRspInstrumentField *pRspInstrument, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
-                       bool bIsLast) {};
+                       bool bIsLast) ;
 
     virtual void
     OnRspQryExchange(CUstpFtdcRspExchangeField *pRspExchange, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
-                     bool bIsLast) {};
+                     bool bIsLast) ;
 
     virtual void
     OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *pRspInvestorPosition, CUstpFtdcRspInfoField *pRspInfo,
-                             int nRequestID, bool bIsLast) {};
+                             int nRequestID, bool bIsLast) ;
 
     virtual void
     OnRspSubscribeTopic(CUstpFtdcDisseminationField *pDissemination, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
-                        bool bIsLast) {};
+                        bool bIsLast) ;
 
     virtual void
     OnRspQryComplianceParam(CUstpFtdcRspComplianceParamField *pRspComplianceParam, CUstpFtdcRspInfoField *pRspInfo,
-                            int nRequestID, bool bIsLast) {};
+                            int nRequestID, bool bIsLast) ;
 
     virtual void
     OnRspQryTopic(CUstpFtdcDisseminationField *pDissemination, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
-                  bool bIsLast) {};
+                  bool bIsLast) ;
 
     virtual void
     OnRspQryInvestorFee(CUstpFtdcInvestorFeeField *pInvestorFee, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
-                        bool bIsLast) {};
+                        bool bIsLast) ;
 
     virtual void OnRspQryInvestorMargin(CUstpFtdcInvestorMarginField *pInvestorMargin, CUstpFtdcRspInfoField *pRspInfo,
-                                        int nRequestID, bool bIsLast) {};
+                                        int nRequestID, bool bIsLast) ;
 
 
 private:

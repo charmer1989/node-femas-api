@@ -83,6 +83,7 @@ void WrapTrader::initEventMap() {
     event_map["rspUserLogin"] = T_ON_RSPUSERLOGIN;
     event_map["rspInsert"] = T_ON_RSPINSERT;
     event_map["errInsert"] = T_ON_ERRINSERT;
+    event_map["rspError"] = T_ON_RSPERROR;
 
 
     event_map["apiReady"] = T_ON_API_READY;
@@ -104,7 +105,6 @@ void WrapTrader::initEventMap() {
     event_map["rqInstrument"] = T_ON_RQINSTRUMENT;
     event_map["rqDdpthmarketData"] = T_ON_RQDEPTHMARKETDATA;
     event_map["rqSettlementInfo"] = T_ON_RQSETTLEMENTINFO;
-    event_map["rspError"] = T_ON_RSPERROR;
 }
 
 void WrapTrader::GetVersion(const FunctionCallbackInfo <Value> &args) {
@@ -207,7 +207,7 @@ void WrapTrader::ReqUserLogin(const FunctionCallbackInfo <Value> &args) {
     WrapTrader *obj = ObjectWrap::Unwrap<WrapTrader>(args.Holder());
     if (!args[3]->IsUndefined() && args[3]->IsFunction()) {
         uuid = ++s_uuid;
-        fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[2]));
+        fun_rtncb_map[uuid].Reset(isolate, Local<Function>::Cast(args[3]));
         std::string _head = std::string(log);
         logger_cout(_head.append(" uuid is ").append(to_string(uuid)).c_str());
     }
@@ -252,75 +252,126 @@ void WrapTrader::ReqOrderInsert(const FunctionCallbackInfo <Value> &args) {
     }
     Local <Object> jsonObj = args[0]->ToObject();
 
-//    Local <Value> hedgeFlag2 = jsonObj->Get(v8::String::NewFromUtf8(isolate, "hedgeFlag2"));
-//    if (hedgeFlag2->IsUndefined()) {
-//        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->hedgeFlag2")));
-//        return;
-//    }
-//    String::Utf8Value hedgeFlag2_(hedgeFlag2->ToString());
-//
-//    Local <Value> marketLevel = jsonObj->Get(v8::String::NewFromUtf8(isolate, "marketLevel"));
-//    if (marketLevel->IsUndefined()) {
-//        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->marketLevel")));
-//        return;
-//    }
-//    double marketLevel_ = marketLevel->NumberValue();
-//
-//    Local <Value> orderDeleteByDisConnFlag = jsonObj->Get(v8::String::NewFromUtf8(isolate, "orderDeleteByDisConnFlag"));
-//    if (orderDeleteByDisConnFlag->IsUndefined()) {
-//        isolate->ThrowException(
-//                Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->orderDeleteByDisConnFlag")));
-//        return;
-//    }
-//    String::Utf8Value orderDeleteByDisConnFlag_(orderDeleteByDisConnFlag->ToString());
-//
-//    TapAPINewOrder req;
-//    memset(&req, 0, sizeof(req));
-//
-//    strcpy(req.AccountNo, ((std::string) * accountNo_).c_str());
-//    strcpy(req.ExchangeNo, ((std::string) * exchangeNo_).c_str());
-//    req.CommodityType = TAPI_COMMODITY_TYPE_FUTURES;
-//    strcpy(req.CommodityNo, ((std::string) * commodityNo_).c_str());
-//    strcpy(req.ContractNo, ((std::string) * contractNo_).c_str());
-//    std::string s("S");
-//    req.OrderSide = s == (std::string) * orderSide_ ? TAPI_SIDE_SELL : TAPI_SIDE_BUY;
-//
-//    std::string log2 = "strcmp:";
-//    logger_cout(log2.append(to_string(s == (std::string) * orderSide_)).c_str());
-//
-//    strcpy(req.StrikePrice, "");
-//    req.CallOrPutFlag = TAPI_CALLPUT_FLAG_NONE;
-//    strcpy(req.ContractNo2, "");
-//    strcpy(req.StrikePrice2, "");
-//    req.CallOrPutFlag2 = TAPI_CALLPUT_FLAG_NONE;
-//    req.OrderType = TAPI_ORDER_TYPE_LIMIT;
-//    req.OrderSource = TAPI_ORDER_SOURCE_ESUNNY_API;
-//    req.TimeInForce = TAPI_ORDER_TIMEINFORCE_FAK;
-//    strcpy(req.ExpireTime, "");
-//    req.IsRiskOrder = APIYNFLAG_NO;
-//    req.PositionEffect = TAPI_PositionEffect_OPEN;
-//    req.PositionEffect2 = TAPI_PositionEffect_NONE;
-//    strcpy(req.InquiryNo, "");
-//    req.HedgeFlag = TAPI_HEDGEFLAG_T;
-//    req.OrderPrice = orderPrice_;
-//    req.OrderPrice2;
-//    req.StopPrice;
-//    req.OrderQty = orderQty_;
-//    req.OrderMinQty;
-//    req.MinClipSize;
-//    req.MaxClipSize;
-//    req.RefInt;
-//    req.RefString;
-//    req.TacticsType = TAPI_TACTICS_TYPE_NONE;
-//    req.TriggerCondition = TAPI_TRIGGER_CONDITION_NONE;
-//    req.TriggerPriceType = TAPI_TRIGGER_PRICE_NONE;
-//    req.AddOneIsValid = APIYNFLAG_NO;
-//    req.OrderQty2;
-//    req.HedgeFlag2 = TAPI_HEDGEFLAG_NONE;
-//    req.MarketLevel = TAPI_MARKET_LEVEL_0;
-//    req.OrderDeleteByDisConnFlag = APIYNFLAG_NO;
-//
-//    obj->uvTrader->ReqOrderInsert(&req, FunRtnCallback, uuid);
+    Local <Value> brokerID = jsonObj->Get(v8::String::NewFromUtf8(isolate, "brokerID"));
+    if (brokerID->IsUndefined()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->brokerID")));
+        return;
+    }
+    String::Utf8Value brokerID_(brokerID->ToString());
+
+    Local <Value> exchangeID = jsonObj->Get(v8::String::NewFromUtf8(isolate, "exchangeID"));
+    if (exchangeID->IsUndefined()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->exchangeID")));
+        return;
+    }
+    String::Utf8Value exchangeID_(exchangeID->ToString());
+
+    Local <Value> orderSysID = jsonObj->Get(v8::String::NewFromUtf8(isolate, "orderSysID"));
+    if (orderSysID->IsUndefined()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->orderSysID")));
+        return;
+    }
+    String::Utf8Value orderSysID_(orderSysID->ToString());
+
+    Local <Value> investorID = jsonObj->Get(v8::String::NewFromUtf8(isolate, "investorID"));
+    if (investorID->IsUndefined()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->investorID")));
+        return;
+    }
+    String::Utf8Value investorID_(investorID->ToString());
+
+    Local <Value> userID = jsonObj->Get(v8::String::NewFromUtf8(isolate, "userID"));
+    if (userID->IsUndefined()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->userID")));
+        return;
+    }
+    String::Utf8Value userID_(userID->ToString());
+
+    Local <Value> seatNo = jsonObj->Get(v8::String::NewFromUtf8(isolate, "seatNo"));
+    if (seatNo->IsUndefined()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->seatNo")));
+        return;
+    }
+    double seatNo_ = seatNo->NumberValue();
+
+    Local <Value> instrumentID = jsonObj->Get(v8::String::NewFromUtf8(isolate, "instrumentID"));
+    if (instrumentID->IsUndefined()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->instrumentID")));
+        return;
+    }
+    String::Utf8Value instrumentID_(instrumentID->ToString());
+
+    Local <Value> userOrderLocalID = jsonObj->Get(v8::String::NewFromUtf8(isolate, "userOrderLocalID"));
+    if (userOrderLocalID->IsUndefined()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->userOrderLocalID")));
+        return;
+    }
+    String::Utf8Value userOrderLocalID_(userOrderLocalID->ToString());
+
+    Local <Value> direction = jsonObj->Get(v8::String::NewFromUtf8(isolate, "direction"));
+    if (direction->IsUndefined()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->direction")));
+        return;
+    }
+    String::Utf8Value direction_(direction->ToString());
+
+    Local <Value> gtdDate = jsonObj->Get(v8::String::NewFromUtf8(isolate, "gtdDate"));
+    if (gtdDate->IsUndefined()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->gtdDate")));
+        return;
+    }
+    String::Utf8Value gtdDate_(gtdDate->ToString());
+
+    Local <Value> businessUnit = jsonObj->Get(v8::String::NewFromUtf8(isolate, "businessUnit"));
+    if (businessUnit->IsUndefined()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->businessUnit")));
+        return;
+    }
+    String::Utf8Value businessUnit_(businessUnit->ToString());
+
+    Local <Value> limitPrice = jsonObj->Get(v8::String::NewFromUtf8(isolate, "limitPrice"));
+    if (limitPrice->IsUndefined()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->limitPrice")));
+        return;
+    }
+    double limitPrice_ = limitPrice->NumberValue();
+
+    Local <Value> volume = jsonObj->Get(v8::String::NewFromUtf8(isolate, "volume"));
+    if (volume->IsUndefined()) {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong arguments->volume")));
+        return;
+    }
+    double volume_ = volume->NumberValue();
+
+    CUstpFtdcInputOrderField req;
+    memset(&req, 0, sizeof(req));
+
+    strcpy(req.BrokerID, ((std::string) * brokerID_).c_str()); ///经纪公司编号
+    strcpy(req.ExchangeID, ((std::string) * exchangeID_).c_str());///交易所代码
+    strcpy(req.OrderSysID, ((std::string) * orderSysID_).c_str());///系统报单编号
+    strcpy(req.InvestorID, ((std::string) * investorID_).c_str());///投资者编号
+    strcpy(req.UserID, ((std::string) * userID_).c_str());///用户代码
+    strcpy(req.InstrumentID, ((std::string) * instrumentID_).c_str());///合约代码
+    strcpy(req.UserOrderLocalID, ((std::string) * userOrderLocalID_).c_str());///用户本地报单号
+    strcpy(req.Direction, ((std::string) * direction_).c_str());///买卖方向
+    strcpy(req.GTDDate, ((std::string) * gtdDate_).c_str());///GTD日期
+    strcpy(req.BusinessUnit, ((std::string) * businessUnit_).c_str());///业务单元
+    req.LimitPrice = limitPrice_;///价格
+    req.Volume = volume_;///数量
+    req.SeatNo = seatNo_;///指定通过此席位序号下单
+
+    req.OrderPriceType = USTP_FTDC_OPT_LimitPrice;///报单类型
+    req.OffsetFlag = USTP_FTDC_OF_Open;///开平标志
+    req.HedgeFlag = USTP_FTDC_CHF_Speculation;///投机套保标志
+    req.TimeCondition = USTP_FTDC_TC_IOC;///有效期类型
+    req.VolumeCondition = USTP_FTDC_VC_AV;///成交量类型
+    req.MinVolume = 1;///最小成交量
+    req.StopPrice = 0;///止损价
+    req.ForceCloseReason = USTP_FTDC_FCR_NotForceClose;///强平原因
+    req.IsAutoSuspend = 0;///自动挂起标志
+    strcpy(req.UserCustom, "");///用户自定义域
+
+    obj->uvTrader->ReqOrderInsert(&req, FunRtnCallback, uuid);
     return;
 }
 
@@ -361,6 +412,13 @@ void WrapTrader::FunCallback(CbRtnField *data) {
             fn->Call(isolate->GetCurrentContext()->Global(), 2, argv);
             break;
         }
+        case T_ON_RSPERROR: {
+            Local <Value> argv[2];
+            pkg_cb_errinsert(data, argv);
+            Local <Function> fn = Local<Function>::New(isolate, cIt->second);
+            fn->Call(isolate->GetCurrentContext()->Global(), 2, argv);
+            break;
+        }
     }
 }
 
@@ -370,8 +428,7 @@ void WrapTrader::FunRtnCallback(int result, void *baton) {
 
     LookupCtpApiBaton *tmp = static_cast<LookupCtpApiBaton *>(baton);
     if (tmp->uuid != -1) {
-        std::map < int, Persistent < Function > > ::iterator
-        it = fun_rtncb_map.find(tmp->uuid);
+        std::map<int, Persistent < Function >> ::iterator it = fun_rtncb_map.find(tmp->uuid);
 
         const unsigned argc = 2;
         Local <Value> argv[argc] = {Integer::New(isolate, tmp->nResult), Integer::New(isolate, tmp->iRequestID)};
@@ -390,25 +447,19 @@ void WrapTrader::pkg_cb_userlogin(CbRtnField *data, Local <Value> *cbArray) {
     if (data->rtnField) {
         CUstpFtdcRspUserLoginField *pRspUserLogin = static_cast<CUstpFtdcRspUserLoginField *>(data->rtnField);
         Local <Object> jsonRtn = Object::New(isolate);
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "UserNo"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->UserNo));
-//
-//        Local <Value> str = Nan::Encode(pRspUserLogin->UserName, strlen(pRspUserLogin->UserName),
-//                                        Nan::Encoding::BUFFER);
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "UserName"), str);
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "QuoteTempPassword"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->QuoteTempPassword));
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "ReservedInfo"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->ReservedInfo));
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "LastLoginIP"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->LastLoginIP));
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "LastLoginTime"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->LastLoginTime));
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "TradeDate"), String::NewFromUtf8(isolate, pRspUserLogin->TradeDate));
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "LastSettleTime"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->LastSettleTime));
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "StartTime"), String::NewFromUtf8(isolate, pRspUserLogin->StartTime));
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "InitTime"), String::NewFromUtf8(isolate, pRspUserLogin->InitTime));
+        jsonRtn->Set(String::NewFromUtf8(isolate, "TradingDay"),
+                     String::NewFromUtf8(isolate, pRspUserLogin->TradingDay));
+        jsonRtn->Set(String::NewFromUtf8(isolate, "BrokerID"),
+                     String::NewFromUtf8(isolate, pRspUserLogin->BrokerID));
+        jsonRtn->Set(String::NewFromUtf8(isolate, "UserID"),
+                     String::NewFromUtf8(isolate, pRspUserLogin->UserID));
+        jsonRtn->Set(String::NewFromUtf8(isolate, "MaxOrderLocalID"),
+                     String::NewFromUtf8(isolate, pRspUserLogin->MaxOrderLocalID));
+        jsonRtn->Set(String::NewFromUtf8(isolate, "TradingSystemName"),
+                     String::NewFromUtf8(isolate, pRspUserLogin->TradingSystemName));
+        jsonRtn->Set(String::NewFromUtf8(isolate, "DataCenterID"),
+                     Number::New(isolate, pRspUserLogin->DataCenterID));
+
         *(cbArray + 1) = jsonRtn;
     } else {
         *(cbArray + 1) = Local<Value>::New(isolate, Undefined(isolate));
@@ -421,38 +472,14 @@ void WrapTrader::pkg_cb_rspinsert(CbRtnField *data, Local <Value> *cbArray) {
 
     *cbArray = Local<Value>::New(isolate, Number::New(isolate, 0));
     if (data->rtnField) {
-        CUstpFtdcInputOrderField *pRspUserLogin = static_cast<CUstpFtdcInputOrderField *>(data->rtnField);
+        CUstpFtdcRspInfoField *pRspInfo = static_cast<CUstpFtdcRspInfoField *>(data->rtnField);
         Local <Object> jsonRtn = Object::New(isolate);
-        logger_cout("---1");
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "UserNo"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->UserNo));
-//        logger_cout("---2");
-//
-//        Local <Value> str = Nan::Encode(pRspUserLogin->UserName, strlen(pRspUserLogin->UserName),
-//                                        Nan::Encoding::BUFFER);
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "UserName"), str);
-//        logger_cout("---3");
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "QuoteTempPassword"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->QuoteTempPassword));
-//        logger_cout("---4");
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "ReservedInfo"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->ReservedInfo));
-//        logger_cout("---5");
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "LastLoginIP"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->LastLoginIP));
-//        logger_cout("---6");
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "LastLoginTime"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->LastLoginTime));
-//        logger_cout("---7");
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "TradeDate"), String::NewFromUtf8(isolate, pRspUserLogin->TradeDate));
-//        logger_cout("---8");
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "LastSettleTime"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->LastSettleTime));
-//        logger_cout("---9");
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "StartTime"), String::NewFromUtf8(isolate, pRspUserLogin->StartTime));
-//        logger_cout("---10");
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "InitTime"), String::NewFromUtf8(isolate, pRspUserLogin->InitTime));
-//        logger_cout("---11");
+        jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorID"),
+                     Number::New(isolate, pRspInfo->ErrorID));
+        Local <Value> str = Nan::Encode(pRspInfo->ErrorMsg, strlen(pRspInfo->ErrorMsg),
+                                        Nan::Encoding::BUFFER);
+        jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorMsg"), str);
+
         *(cbArray + 1) = jsonRtn;
     } else {
         *(cbArray + 1) = Local<Value>::New(isolate, Undefined(isolate));
@@ -465,19 +492,14 @@ void WrapTrader::pkg_cb_errinsert(CbRtnField *data, Local <Value> *cbArray) {
 
     *cbArray = Local<Value>::New(isolate, Number::New(isolate, data->errorCode));
     if (data->rtnField) {
-        CUstpFtdcInputOrderField *pRspUserLogin = static_cast<CUstpFtdcInputOrderField *>(data->rtnField);
+        CUstpFtdcRspInfoField *pRspInfo = static_cast<CUstpFtdcRspInfoField *>(data->rtnField);
         Local <Object> jsonRtn = Object::New(isolate);
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "ActionType"),
-//                     String::NewFromUtf8(isolate, (char *) pRspUserLogin->ActionType));
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "AccountNo"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->OrderInfo->AccountNo));
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "ExchangeNo"),
-//                     String::NewFromUtf8(isolate, pRspUserLogin->OrderInfo->ExchangeNo));
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "RefInt"), Number::New(isolate, pRspUserLogin->OrderInfo->RefInt));
+        jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorID"),
+                     Number::New(isolate, pRspInfo->ErrorID));
+        Local <Value> str = Nan::Encode(pRspInfo->ErrorMsg, strlen(pRspInfo->ErrorMsg),
+                                        Nan::Encoding::BUFFER);
+        jsonRtn->Set(String::NewFromUtf8(isolate, "ErrorMsg"), str);
 
-//        Local <Value> str = Nan::Encode(pRspUserLogin->UserName, strlen(pRspUserLogin->UserName),
-//                                        Nan::Encoding::BUFFER);
-//        jsonRtn->Set(String::NewFromUtf8(isolate, "UserName"), str);
         *(cbArray + 1) = jsonRtn;
     } else {
         *(cbArray + 1) = Local<Value>::New(isolate, Undefined(isolate));

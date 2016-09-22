@@ -21,7 +21,7 @@ std::string charto_string(char val) {
 }
 
 std::map<int, CbWrap *> uv_trader::cb_map;
-int hasConnect=0;
+int hasConnect = 0;
 
 uv_trader::uv_trader(void) {
     iRequestID = 0;
@@ -34,8 +34,8 @@ uv_trader::~uv_trader(void) {
 }
 
 const char *uv_trader::GetVersion() {
-    int nMajorVersion=0;
-    int nMinorVersion=0;
+    int nMajorVersion = 0;
+    int nMinorVersion = 0;
 
     const char *apiVersion = this->m_pApi->GetVersion(nMajorVersion, nMinorVersion);
     return apiVersion;
@@ -79,13 +79,13 @@ void uv_trader::ReqOrderInsert(CUstpFtdcInputOrderField *pInputOrder, void(*call
 
 void uv_trader::OnFrontConnected() {
     if (!hasConnect) {
-        std::string log = "uv_trader OnFrontConnected";
+        std::string log = "uv_trader OnFrontConnected !!!!!!!!!!";
         logger_cout(log.c_str());
         CbRtnField *field = new CbRtnField();
         field->eFlag = T_ON_CONNECT;
         field->work.data = field;
         uv_queue_work(uv_default_loop(), &field->work, _on_async, _on_completed);
-        hasConnect=1;
+        hasConnect = 1;
     }
 }
 
@@ -98,31 +98,42 @@ uv_trader::OnRspUserLogin(CUstpFtdcRspUserLoginField *pRspUserLogin, CUstpFtdcRs
         memcpy(_pRspUserLogin, pRspUserLogin, sizeof(CUstpFtdcRspUserLoginField));
     }
     std::string log = "uv_trader OnRspLogin------>";
-    logger_cout(log.append("nRequestID:").append(to_string( nRequestID)).c_str());
+    logger_cout(log.append("nRequestID:").append(to_string(nRequestID)).c_str());
     on_invoke(T_ON_RSPUSERLOGIN, _pRspUserLogin, nRequestID);
 }
 
 void uv_trader::OnRspOrderInsert(CUstpFtdcInputOrderField *pInputOrder, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
                                  bool bIsLast) {
-    CUstpFtdcInputOrderField *_pInputOrder = NULL;
-    if (pInputOrder) {
-        _pInputOrder = new CUstpFtdcInputOrderField();
-        memcpy(_pInputOrder, pInputOrder, sizeof(CUstpFtdcInputOrderField));
+    CUstpFtdcRspInfoField *_pRspInfo = NULL;
+    if (pRspInfo) {
+        _pRspInfo = new CUstpFtdcRspInfoField();
+        memcpy(_pRspInfo, pRspInfo, sizeof(CUstpFtdcRspInfoField));
     }
-    std::string log = "uv_trader OnRtnOrder------>";
+    std::string log = "uv_trader OnRspOrderInsert------>";
     logger_cout(log.c_str());
-    on_invoke(T_ON_RSPINSERT, _pInputOrder, 0);
+    on_invoke(T_ON_RSPINSERT, _pRspInfo, nRequestID);
 }
 
 void uv_trader::OnErrRtnOrderInsert(CUstpFtdcInputOrderField *pInputOrder, CUstpFtdcRspInfoField *pRspInfo) {
-    CUstpFtdcInputOrderField *_pOrderAction = NULL;
-    if (pInputOrder) {
-        _pOrderAction = new CUstpFtdcInputOrderField();
-        memcpy(_pOrderAction, pInputOrder, sizeof(CUstpFtdcInputOrderField));
+    CUstpFtdcRspInfoField *_pRspInfo = NULL;
+    if (pRspInfo) {
+        _pRspInfo = new CUstpFtdcRspInfoField();
+        memcpy(_pRspInfo, pRspInfo, sizeof(CUstpFtdcRspInfoField));
     }
-    std::string log = "uv_trader OnRspOrderAction------>";
+    std::string log = "uv_trader OnErrRtnOrderInsert------>";
     logger_cout(log.c_str());
-    on_invoke(T_ON_ERRINSERT, _pOrderAction, 0);
+    on_invoke(T_ON_ERRINSERT, _pRspInfo, 0);
+};
+
+void uv_trader::OnRspError(CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+    CUstpFtdcRspInfoField *_pRspInfo = NULL;
+    if (pRspInfo) {
+        _pRspInfo = new CUstpFtdcRspInfoField();
+        memcpy(_pRspInfo, pRspInfo, sizeof(CUstpFtdcRspInfoField));
+    }
+    std::string log = "uv_trader OnRspError------>";
+    logger_cout(log.c_str());
+    on_invoke(T_ON_RSPERROR, _pRspInfo, 0);
 };
 
 void uv_trader::_async(uv_work_t *work) {
@@ -214,3 +225,144 @@ void uv_trader::on_invoke(int event_type, void *_stru, int nRequestID) {
     field->nRequestID = nRequestID;
     uv_queue_work(uv_default_loop(), &field->work, _on_async, _on_completed);
 }
+
+
+void uv_trader::OnFrontDisconnected(int nReason) {
+    logger_cout("-----------uv OnFrontDisconnected");
+    logger_cout(to_string(nReason).c_str());
+};
+
+void uv_trader::OnHeartBeatWarning(int nTimeLapse) {
+    logger_cout("-----------uv OnHeartBeatWarning");
+};
+
+void uv_trader::OnPackageStart(int nTopicID, int nSequenceNo) {
+    logger_cout("-----------uv OnPackageStart");
+};
+
+void uv_trader::OnPackageEnd(int nTopicID, int nSequenceNo) {
+    logger_cout("-----------uv OnPackageEnd");
+};
+
+void
+uv_trader::OnRspUserLogout(CUstpFtdcRspUserLogoutField *pRspUserLogout, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
+                           bool bIsLast) {
+    logger_cout("-----------uv OnRspUserLogout");
+};
+
+void
+uv_trader::OnRspUserPasswordUpdate(CUstpFtdcUserPasswordUpdateField *pUserPasswordUpdate,
+                                   CUstpFtdcRspInfoField *pRspInfo,
+                                   int nRequestID, bool bIsLast) {
+    logger_cout("-----------uv OnRspUserPasswordUpdate");
+};
+
+void
+uv_trader::OnRspOrderAction(CUstpFtdcOrderActionField *pOrderAction, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
+                            bool bIsLast) {
+    logger_cout("-----------uv OnRspOrderAction");
+};
+
+void uv_trader::OnRtnFlowMessageCancel(CUstpFtdcFlowMessageCancelField *pFlowMessageCancel) {
+    logger_cout("-----------uv OnRtnFlowMessageCancel");
+};
+
+void uv_trader::OnRtnTrade(CUstpFtdcTradeField *pTrade) {
+    logger_cout("-----------uv OnRtnTrade");
+};
+
+void uv_trader::OnRtnOrder(CUstpFtdcOrderField *pOrder) {
+    logger_cout("-----------uv OnRtnOrder");
+};
+
+void uv_trader::OnErrRtnOrderAction(CUstpFtdcOrderActionField *pOrderAction, CUstpFtdcRspInfoField *pRspInfo) {
+    logger_cout("-----------uv OnErrRtnOrderAction");
+};
+
+void uv_trader::OnRtnInstrumentStatus(CUstpFtdcInstrumentStatusField *pInstrumentStatus) {
+    logger_cout("-----------uv OnRtnInstrumentStatus");
+};
+
+void uv_trader::OnRtnInvestorAccountDeposit(CUstpFtdcInvestorAccountDepositResField *pInvestorAccountDepositRes) {
+    logger_cout("-----------uv OnRtnInvestorAccountDeposit");
+};
+
+void
+uv_trader::OnRspQryOrder(CUstpFtdcOrderField *pOrder, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+    logger_cout("-----------uv OnRspQryOrder");
+};
+
+void
+uv_trader::OnRspQryTrade(CUstpFtdcTradeField *pTrade, CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+    logger_cout("-----------uv OnRspQryTrade");
+};
+
+void uv_trader::OnRspQryUserInvestor(CUstpFtdcRspUserInvestorField *pRspUserInvestor, CUstpFtdcRspInfoField *pRspInfo,
+                                     int nRequestID, bool bIsLast) {
+    logger_cout("-----------uv OnRspQryUserInvestor");
+};
+
+void
+uv_trader::OnRspQryTradingCode(CUstpFtdcRspTradingCodeField *pRspTradingCode, CUstpFtdcRspInfoField *pRspInfo,
+                               int nRequestID,
+                               bool bIsLast) {
+    logger_cout("-----------uv OnRspQryTradingCode");
+};
+
+void
+uv_trader::OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *pRspInvestorAccount,
+                                   CUstpFtdcRspInfoField *pRspInfo,
+                                   int nRequestID, bool bIsLast) {
+    logger_cout("-----------uv OnRspQryInvestorAccount");
+};
+
+void
+uv_trader::OnRspQryInstrument(CUstpFtdcRspInstrumentField *pRspInstrument, CUstpFtdcRspInfoField *pRspInfo,
+                              int nRequestID,
+                              bool bIsLast) {
+    logger_cout("-----------uv OnRspQryInstrument");
+};
+
+void
+uv_trader::OnRspQryExchange(CUstpFtdcRspExchangeField *pRspExchange, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
+                            bool bIsLast) {
+    logger_cout("-----------uv OnRspQryExchange");
+};
+
+void
+uv_trader::OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *pRspInvestorPosition,
+                                    CUstpFtdcRspInfoField *pRspInfo,
+                                    int nRequestID, bool bIsLast) {
+    logger_cout("-----------uv OnRspQryInvestorPosition");
+};
+
+void
+uv_trader::OnRspSubscribeTopic(CUstpFtdcDisseminationField *pDissemination, CUstpFtdcRspInfoField *pRspInfo,
+                               int nRequestID,
+                               bool bIsLast) {
+    logger_cout("-----------uv OnRspSubscribeTopic");
+};
+
+void
+uv_trader::OnRspQryComplianceParam(CUstpFtdcRspComplianceParamField *pRspComplianceParam,
+                                   CUstpFtdcRspInfoField *pRspInfo,
+                                   int nRequestID, bool bIsLast) {
+    logger_cout("-----------uv OnRspQryComplianceParam");
+};
+
+void
+uv_trader::OnRspQryTopic(CUstpFtdcDisseminationField *pDissemination, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
+                         bool bIsLast) {
+    logger_cout("-----------uv OnRspQryTopic");
+};
+
+void
+uv_trader::OnRspQryInvestorFee(CUstpFtdcInvestorFeeField *pInvestorFee, CUstpFtdcRspInfoField *pRspInfo, int nRequestID,
+                               bool bIsLast) {
+    logger_cout("-----------uv OnRspQryInvestorFee");
+};
+
+void uv_trader::OnRspQryInvestorMargin(CUstpFtdcInvestorMarginField *pInvestorMargin, CUstpFtdcRspInfoField *pRspInfo,
+                                       int nRequestID, bool bIsLast) {
+    logger_cout("-----------uv OnRspQryInvestorMargin");
+};
