@@ -112,7 +112,7 @@ void WrapTrader::GetVersion(const FunctionCallbackInfo <Value> &args) {
 
     WrapTrader *wTrader = ObjectWrap::Unwrap<WrapTrader>(args.Holder());
     const char *apiVersion = wTrader->uvTrader->GetVersion();
-    logger_cout("调用结果:");
+    logger_cout("result:");
     logger_cout(apiVersion);
 
     args.GetReturnValue().Set(String::NewFromUtf8(isolate, apiVersion));
@@ -346,30 +346,34 @@ void WrapTrader::ReqOrderInsert(const FunctionCallbackInfo <Value> &args) {
     CUstpFtdcInputOrderField req;
     memset(&req, 0, sizeof(req));
 
-    strcpy(req.BrokerID, ((std::string) * brokerID_).c_str()); ///经纪公司编号
-    strcpy(req.ExchangeID, ((std::string) * exchangeID_).c_str());///交易所代码
-    strcpy(req.OrderSysID, ((std::string) * orderSysID_).c_str());///系统报单编号
-    strcpy(req.InvestorID, ((std::string) * investorID_).c_str());///投资者编号
-    strcpy(req.UserID, ((std::string) * userID_).c_str());///用户代码
-    strcpy(req.InstrumentID, ((std::string) * instrumentID_).c_str());///合约代码
-    strcpy(req.UserOrderLocalID, ((std::string) * userOrderLocalID_).c_str());///用户本地报单号
-    strcpy(req.Direction, ((std::string) * direction_).c_str());///买卖方向
-    strcpy(req.GTDDate, ((std::string) * gtdDate_).c_str());///GTD日期
-    strcpy(req.BusinessUnit, ((std::string) * businessUnit_).c_str());///业务单元
-    req.LimitPrice = limitPrice_;///价格
-    req.Volume = volume_;///数量
-    req.SeatNo = seatNo_;///指定通过此席位序号下单
+    strcpy(req.BrokerID, ((std::string) * brokerID_).c_str());
+    strcpy(req.ExchangeID, ((std::string) * exchangeID_).c_str());
+    strcpy(req.OrderSysID, ((std::string) * orderSysID_).c_str());
+    strcpy(req.InvestorID, ((std::string) * investorID_).c_str());
+    strcpy(req.UserID, ((std::string) * userID_).c_str());
+    strcpy(req.InstrumentID, ((std::string) * instrumentID_).c_str());
+    strcpy(req.UserOrderLocalID, ((std::string) * userOrderLocalID_).c_str());
 
-    req.OrderPriceType = USTP_FTDC_OPT_LimitPrice;///报单类型
-    req.OffsetFlag = USTP_FTDC_OF_Open;///开平标志
-    req.HedgeFlag = USTP_FTDC_CHF_Speculation;///投机套保标志
-    req.TimeCondition = USTP_FTDC_TC_IOC;///有效期类型
-    req.VolumeCondition = USTP_FTDC_VC_AV;///成交量类型
-    req.MinVolume = 1;///最小成交量
-    req.StopPrice = 0;///止损价
-    req.ForceCloseReason = USTP_FTDC_FCR_NotForceClose;///强平原因
-    req.IsAutoSuspend = 0;///自动挂起标志
-    strcpy(req.UserCustom, "");///用户自定义域
+    std::string s("0");
+    req.Direction = s == (std::string) * direction_ ? USTP_FTDC_D_Buy : USTP_FTDC_D_Sell;
+    std::cout << "----Direction:" << req.Direction << std::endl;
+
+    strcpy(req.GTDDate, ((std::string) * gtdDate_).c_str());
+    strcpy(req.BusinessUnit, ((std::string) * businessUnit_).c_str());
+    req.LimitPrice = limitPrice_;
+    req.Volume = volume_;
+    req.SeatNo = seatNo_;
+
+    req.OrderPriceType = USTP_FTDC_OPT_LimitPrice;
+    req.OffsetFlag = USTP_FTDC_OF_Open;
+    req.HedgeFlag = USTP_FTDC_CHF_Speculation;
+    req.TimeCondition = USTP_FTDC_TC_IOC;
+    req.VolumeCondition = USTP_FTDC_VC_AV;
+    req.MinVolume = 1;
+    req.StopPrice = 0;
+    req.ForceCloseReason = USTP_FTDC_FCR_NotForceClose;
+    req.IsAutoSuspend = 0;
+    strcpy(req.UserCustom, "");
 
     obj->uvTrader->ReqOrderInsert(&req, FunRtnCallback, uuid);
     return;

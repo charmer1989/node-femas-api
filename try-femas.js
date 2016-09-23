@@ -1,4 +1,5 @@
 var femas = require('./build/Release/femas.node');
+var iconv = require('iconv-lite');
 
 console.log(typeof femas);
 femas.settings({log:true});
@@ -13,7 +14,7 @@ trader.on('connect', function(){
     console.log("JS____       ON CONNECT");
     if (hasConnect) return ;
     hasConnect = true;
-    trader.reqUserLogin("8001036327", "123456", "88888", function (result) {
+    trader.reqUserLogin("8001036327", "123456", "0177", function (result) {
         console.log("JS____ trader->reqUserLogin->result:", result);
     });
 });
@@ -22,35 +23,35 @@ trader.on("rspUserLogin", function (errCode, userInfo) {
     console.log("JS____ ON rspUserLogin, errCode:", errCode, "userInfo:",userInfo);
     setTimeout(function () {
         trader.reqOrderInsert({
-            brokerID: "88888",///经纪公司编号
+            brokerID: "0177",///经纪公司编号
             exchangeID: "CFFEX",///交易所代码
             investorID: "8001036327",///投资者编号
             userID: "8001036327",///用户代码
-            instrumentID: "au1612",///合约代码
-            userOrderLocalID: "000000000001",///用户本地报单号
-            direction: "0",///买卖方向 买0  卖1
-            limitPrice: 293,///价格
+            instrumentID: "IF1610",///合约代码
+            userOrderLocalID: "00000000000000000007",///用户本地报单号
+            direction: "1",///买卖方向 买0  卖1
+            limitPrice: 3500,///价格
             volume: 1,///数量
 
             orderSysID: "",///系统报单编号
             seatNo: "",///指定通过此席位序号下单
             // 未使用
-            gtdDate: "",///GTD日期
+            gtdDate: "20160923",///GTD日期
             businessUnit: "",///业务单元
         }, function (result) {
             console.log("JS____ trader->reqOrderInsert->result:", result);
         });
-    }, 3000);
+    }, 2000);
 });
 trader.on("rspInsert", function (errCode, rspInfo) {
-    rspInfo.ErrorMsg = rspInfo.ErrorMsg.toString('utf8');
+    rspInfo.ErrorMsg = iconv.decode(rspInfo.ErrorMsg, 'GB2312');
     console.log("JS____ ON rspInsert, errCode:", errCode, "rspInfo:",rspInfo);
 });
 trader.on("errInsert", function (errCode, rspInfo) {
-    rspInfo.ErrorMsg = rspInfo.ErrorMsg.toString('utf8');
+    rspInfo.ErrorMsg = iconv.decode(rspInfo.ErrorMsg, 'GB2312');
     console.log("JS____ ON errInsert, errCode:", errCode, "rspInfo:",rspInfo);
 });
 trader.on('rspError', function (errCode, rspInfo) {
-    rspInfo.ErrorMsg = rspInfo.ErrorMsg.toString('utf8');
+    rspInfo.ErrorMsg = iconv.decode(rspInfo.ErrorMsg, 'GB2312');
     console.log("JS____ ON rspError, errCode:", errCode, "rspInfo:",rspInfo);
 });

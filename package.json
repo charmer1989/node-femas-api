@@ -1,0 +1,27 @@
+{
+  "author": "",
+  "dependencies": {
+    "nan": "^2.4.0"
+  },
+  "description": "飞马API nodejs扩展 目前仅支持windows 10  nodejs为32位",
+  "devDependencies": {},
+  "directories": {},
+  "gitHead": "",
+  "gypfile": true,
+  "license": "ISC",
+  "main": "main.js",
+  "maintainers": [
+    {
+      "name": "charmer1989",
+      "email": "charmer01@sina.com"
+    }
+  ],
+  "name": "femas-win",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "scripts": {
+    "install": "node-gyp rebuild",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.1"
+}
